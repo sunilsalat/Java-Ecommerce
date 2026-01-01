@@ -33,6 +33,6 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
-        return jwtUtil.generateToken(user.getEmail());
+        return jwtUtil.generateToken(user);
     }
 }

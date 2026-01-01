@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,6 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -32,11 +35,20 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = extractTokenFromCookies(request);
 
+        Map<String, Object> claimsMap = new HashMap<String, Object>();
+
         if (token != null && jwtUtil.validateToken(token)) {
-            String email = jwtUtil.extractEmail(token);
+            Claims claims = jwtUtil.decodeToken(token);
+            String email = claims.get("email", String.class);
+            String role = claims.get("role", String.class);
+            Long id = claims.get("id", Long.class);
+
+            claimsMap.put("email", email);
+            claimsMap.put("role", role);
+            claimsMap.put("id", id);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    email, // principal (the user identifier)
+                    claimsMap, // principal (the user identifier)
                     null, // credentials (we don't need password here)
                     Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")) // authorities
             );
