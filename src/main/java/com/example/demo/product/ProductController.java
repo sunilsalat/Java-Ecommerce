@@ -15,6 +15,7 @@ public class ProductController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAuthority('PRODUCT_CREATE')")
     public Product createProduct(@Valid @RequestBody Product product) {
         return service.create(product);
     }

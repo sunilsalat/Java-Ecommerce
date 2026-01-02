@@ -1,6 +1,9 @@
 package com.example.demo.auth;
 
 import jakarta.validation.Valid;
+
+import java.util.Map;
+
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +25,17 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        String token = authService.login(user.getEmail(), user.getPassword());
+        Map<String, String> tokens = authService.login(user.getEmail(), user.getPassword());
 
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", tokens.get("access_token"))
+                .httpOnly(true)
+                .path("/")
+                .maxAge(10 * 60 * 60)
+                .sameSite("Lax")
+                .secure(true)
+                .build();
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", tokens.get("refresh_token"))
                 .httpOnly(true)
                 .path("/")
                 .maxAge(10 * 60 * 60)
@@ -33,13 +44,22 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok()
-                .header("Set-Cookie", cookie.toString())
+                .header("Set-Cookie", accessTokenCookie.toString())
+                .header("Set-Cookie", refreshTokenCookie.toString())
                 .body("Login successful");
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .secure(true)
+                .build();
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .path("/")
                 .maxAge(0)
@@ -48,7 +68,8 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok()
-                .header("Set-Cookie", cookie.toString())
+                .header("Set-Cookie", accessTokenCookie.toString())
+                .header("Set-Cookie", refreshTokenCookie.toString())
                 .body("Logout successful");
     }
 }

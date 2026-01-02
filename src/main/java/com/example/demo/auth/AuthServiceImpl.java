@@ -2,6 +2,7 @@ package com.example.demo.auth;
 
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.Map;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -27,12 +28,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(String email, String password) {
+    public Map<String, String> login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
-        return jwtUtil.generateToken(user);
+
+        System.out.println("User: " + user);
+
+        Map<String, String> tokens = jwtUtil.generateTokens(user);
+
+        return tokens;
     }
 }
