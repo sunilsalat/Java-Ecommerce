@@ -1,0 +1,48 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-exe:
+    runs-on: windows-latest
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Java (Windows JDK)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      # 3️⃣ Build Spring Boot JAR
+      - name: Build JAR with Maven
+        run: mvn clean package -DskipTests
+
+      # 4️⃣ Build Windows EXE using jpackage
+      - name: Build EXE with jpackage
+        run: |
+          jpackage ^
+            --type exe ^
+            --name DemoApp ^
+            --input target ^
+            --main-jar demo-0.0.1-SNAPSHOT.jar ^
+            --app-version 0.0.1 ^
+            --vendor "Demo Company" ^
+            --description "Spring Boot Application" ^
+            --java-options "-Xmx512m" ^
+            --win-console
+
+      # 5️⃣ Upload EXE as artifact
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: DemoApp-Windows-EXE
+          path: DemoApp*.exe
