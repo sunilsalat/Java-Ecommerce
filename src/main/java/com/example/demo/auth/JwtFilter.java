@@ -14,8 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -26,6 +28,14 @@ public class JwtFilter extends OncePerRequestFilter {
     public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
+
+    Map<String, List<String>> rolePermissions = Map.of(
+            "ADMIN", List.of("USER_VIEW", "USER_CREATE", "USER_UPDATE",
+                    "PRODUCT_VIEW", "PRODUCT_CREATE", "PRODUCT_UPDATE", "PRODUCT_DELETE",
+                    "ZONE_ENTER", "ZONE_MANAGE"),
+            "VENDOR", List.of("PRODUCT_VIEW", "PRODUCT_CREATE", "PRODUCT_UPDATE", "PRODUCT_DELETE",
+                    "ZONE_ENTER"),
+            "USER", List.of("USER_VIEW", "PRODUCT_VIEW", "ZONE_ENTER"));
 
     @Override
     protected void doFilterInternal(
@@ -47,10 +57,15 @@ public class JwtFilter extends OncePerRequestFilter {
             claimsMap.put("role", role);
             claimsMap.put("id", id);
 
+            List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+
+            rolePermissions.get(role).forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission)));
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     claimsMap, // principal (the user identifier)
                     null, // credentials (we don't need password here)
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)) // authorities
+                    authorities // role based permissions
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);

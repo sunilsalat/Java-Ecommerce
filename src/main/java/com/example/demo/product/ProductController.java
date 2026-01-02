@@ -3,6 +3,7 @@ package com.example.demo.product;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/product")
@@ -28,6 +29,7 @@ public class ProductController {
         return service.getById(id);
     }
 
+    @PreAuthorize("hasAuthority('PRODUCT_DELETE')")
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
         service.delete(id);
