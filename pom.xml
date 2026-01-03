@@ -56,12 +56,12 @@
     	</dependency>
 
 		<!-- Spring Boot DevTools - enables hot reload/restart -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
-		</dependency>
+		</dependency> -->
 
 		
     <!-- Spring Security -->
@@ -105,32 +105,15 @@
 	</dependencies>
 
 	<build>
-    <plugins>
-
-        <!-- Disable Spring Boot fat JAR -->
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <configuration>
-                <skip>true</skip>
-            </configuration>
-        </plugin>
-
-        <!-- Plain JAR with main class -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <mainClass>com.example.demo.DemoApplication</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-        </plugin>
-
-    </plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.example.demo.DemoApplication</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
-
 
 </project>

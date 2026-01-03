@@ -10,22 +10,19 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1️⃣ Checkout source code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Java (jpackage included)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
+          cache: maven
 
-      # 3️⃣ Build Spring Boot JAR
-      - name: Build JAR
+      - name: Build Spring Boot JAR
         run: mvn clean package -DskipTests
 
-      # 4️⃣ Build EXE using jpackage (DEBUG)
       - name: Build Windows EXE (jpackage)
         shell: cmd
         run: |
@@ -36,12 +33,11 @@ jobs:
             --main-jar demo-0.0.1-SNAPSHOT.jar ^
             --main-class com.example.demo.DemoApplication ^
             --dest dist ^
-            --app-version 1.0.0 ^
+            --app-version 1.0.${{ github.run_number }} ^
             --vendor "Your Company" ^
             --win-console
 
-      # 5️⃣ Upload EXE artifact
-      - name: Upload EXE
+      - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: DemoApp-Windows
